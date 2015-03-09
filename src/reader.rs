@@ -1,7 +1,9 @@
+use std::io;
 use std::io::prelude::*;
+use std::iter::FromIterator;
 
 pub struct IrcReader<T> {
-	inner: std::io::Split<T>
+	inner: io::Split<T>
 }
 
 impl<T: BufRead> IrcReader<T> {
@@ -13,9 +15,9 @@ impl<T: BufRead> IrcReader<T> {
 }
 
 impl<T: BufRead> Iterator for IrcReader<T> {
-	type Item = std::io::Result<String>;
+	type Item = io::Result<String>;
 
-	fn next(&mut self) -> Option<std::io::Result<String>> {
+	fn next(&mut self) -> Option<io::Result<String>> {
 		let mut buf = Vec::new();
 		loop {
 			match self.inner.next() {
@@ -31,7 +33,7 @@ impl<T: BufRead> Iterator for IrcReader<T> {
 		buf.pop();	// remove CR char at end
 		Some(Ok(match String::from_utf8(buf) {
 			Ok(s) => s,
-			Err(e) => std::iter::FromIterator::from_iter(e.into_bytes().into_iter().map(|b| b as char))
+			Err(e) => FromIterator::from_iter(e.into_bytes().into_iter().map(|b| b as char))
 		}))
 	}
 }

@@ -58,6 +58,33 @@ pub fn parse_irc_message(msg: &str) -> Option<IrcMessage> {
 	})
 }
 
+use std::fmt::{Display, Formatter, Error};
+
+impl<'a> Display for IrcMessage<'a> {
+	fn fmt(&self, fmt: &mut Formatter) -> Result<(), Error> {
+		match self.prefix {
+			Some(p) => try!(write!(fmt, ":{} {}", p, self.command)),
+			None => try!(write!(fmt, "{}", self.command))
+		}
+		let (rest, tail) = match self.args.last() {
+			Some(l) => if l.contains(' ') {
+				(&self.args[..(self.args.len()-1)], Some(l))
+			} else {
+				(&self.args[..], None)
+			},
+			None => (&self.args[..], None)
+		};
+		for arg in rest {
+			try!(write!(fmt, " {}", arg));
+		}
+		match tail {
+			Some(t) => try!(write!(fmt, " :{}", t)),
+			None => {}
+		}
+		Ok(())
+	}
+}
+
 struct IrcSplit<'a>(&'a str);
 
 impl<'a> Iterator for IrcSplit<'a> {
