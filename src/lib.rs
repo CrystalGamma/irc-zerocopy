@@ -1,10 +1,19 @@
 #![feature(collections)]
 #![feature(io)]
+#![feature(convert)]
 
 pub mod parse;
 pub use parse::{IrcMessage, parse_irc_message};
 pub mod reader;
 pub use reader::IrcReader;
+
+use std::convert::AsRef;
+
+trait FirstCharExt: AsRef<str> {
+	fn first_char(&self) -> char {self.as_ref().chars().next().expect("tried to get the first code point of an empty string")}
+}
+
+impl<S: AsRef<str>> FirstCharExt for S {}
 
 #[derive(Copy, Debug)]
 pub struct TargetList<'a>(&'a str);
@@ -129,7 +138,7 @@ pub fn nick_from_mask(mask: &str) -> &str {
 
 pub fn is_channel_name(s: &str) -> bool {
 	if s.len() > 2 {
-		let c = s.char_at(0);
+		let c = s.first_char();
 		c == '#' || c == '!' || c == '&' || c == '+'
 	} else {false}
 }

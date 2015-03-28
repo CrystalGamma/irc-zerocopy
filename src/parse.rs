@@ -1,3 +1,5 @@
+use FirstCharExt;
+
 #[cfg(test)]
 mod tests {
 	use super::{parse_irc_message, IrcMessage};
@@ -43,7 +45,7 @@ pub struct IrcMessage<'a> {
 
 pub fn parse_irc_message(msg: &str) -> Option<IrcMessage> {
 	if msg.len() == 0 { return None }	// an empty line is not an IRC message
-	let (prefix, main) = if msg.char_at(0) == ':' {
+	let (prefix, main) = if msg.first_char() == ':' {
 		match msg.find(' ') {
 			Some(p) => (Some(&msg[1..p]), &msg[(p+1)..]),
 			None => return None
@@ -67,7 +69,7 @@ impl<'a> Display for IrcMessage<'a> {
 			None => try!(write!(fmt, "{}", self.command))
 		}
 		let (rest, tail) = match self.args.last() {
-			Some(l) => if l.contains(' ') {
+			Some(l) => if l.contains(' ') || l.first_char() == ':' {
 				(&self.args[..(self.args.len()-1)], Some(l))
 			} else {
 				(&self.args[..], None)
@@ -92,7 +94,7 @@ impl<'a> Iterator for IrcSplit<'a> {
 	fn next<'x>(&'x mut self) -> Option<&'a str> {
 		let IrcSplit(s) = *self;
 		if s.len() == 0 { return None }
-		if s.char_at(0) != ':' {
+		if s.first_char() != ':' {
 			let (res, next) = s.find(' ').map(|p| (Some(&s[..p]), &s[(p+1)..])).unwrap_or((Some(s), &s[..0]));
 			*self = IrcSplit(next);
 			res
