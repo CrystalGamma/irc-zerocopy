@@ -23,9 +23,9 @@ impl<T: BufRead> Iterator for IrcReader<T> {
 			match self.inner.next() {
 				None => return None,
 				Some(Err(e)) => return Some(Err(e)),
-				Some(Ok(mut bytes)) => {
+				Some(Ok(bytes)) => {
 					if buf.len() > 0 {buf.push(10);}
-					buf.append(&mut bytes);
+					buf.extend(bytes);
 					if buf.last() == Some(&13) {break}
 				}
 			}

@@ -1,7 +1,3 @@
-#![feature(collections)]
-#![feature(io)]
-#![feature(convert)]
-
 pub mod parse;
 pub use parse::{IrcMessage, parse_irc_message};
 pub mod reader;
@@ -15,7 +11,7 @@ trait FirstCharExt: AsRef<str> {
 
 impl<S: AsRef<str>> FirstCharExt for S {}
 
-#[derive(Copy, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct TargetList<'a>(&'a str);
 
 impl<'a> TargetList<'a> {
